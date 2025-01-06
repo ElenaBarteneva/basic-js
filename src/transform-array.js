@@ -13,10 +13,57 @@ const { NotImplementedError } = require('../extensions/index.js');
  * transform([1, 2, 3, '--discard-prev', 4, 5]) => [1, 2, 4, 5]
  * 
  */
-function transform(/* arr */) {
-  throw new NotImplementedError('Not implemented');
-  // remove line with error and write your code here
+
+const controlSequences = [
+  "--discard-next", // excludes the next element of the array from the transformed array.
+  "--discard-prev", // excludes the previous element of the array from the transformed array.
+  "--double-next", // duplicates the next element of the array in the transformed array.
+  "--double-prev", // duplicates the previous element of the array in the transformed array.
+];
+
+function transform(arr) {
+  if (!(arr instanceof Array)) {
+    throw new Error("'arr' parameter must be an instance of the Array!");
+  }
+
+  const arrCopy = arr.slice();
+  const transformedArray = [];
+  let index = 0;
+
+  arrCopy.forEach((element) => {
+    if (element && element !== "discarded") {
+      if (controlSequences.includes(element)) {
+        switch (element) {
+          case "--discard-next":
+            arrCopy[index + 1] = "discarded";
+            break;
+          case "--discard-prev":
+            if (arrCopy[index - 1] !== "discarded") {
+              transformedArray.pop();
+            }
+            break;
+          case "--double-next":
+            if (arrCopy[index + 1]) {
+              transformedArray.push(arrCopy[index + 1]);
+            }
+            break;
+          case "--double-prev":
+            if (transformedArray[index - 1]) {
+              transformedArray.push(transformedArray[index - 1]);
+            }
+            break;
+        }
+      } else {
+        transformedArray.push(element);
+      }
+    }
+    index += 1;
+  });
+
+  return transformedArray;
 }
+
+
 
 module.exports = {
   transform
